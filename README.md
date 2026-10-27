@@ -19,7 +19,7 @@ The implementation relies on scikit-learn's t-SNE internals, so use the version 
 
 ## Real-data evaluation
 
-1. Follow the [ACE instructions](https://github.com/ZWStatLab/ACE) to obtain the real-data model outputs and corresponding `file_list` directory. The outputs and `file_list` are available through the [ACE Google Drive folder](https://drive.google.com/drive/folders/1HBmYO_BThSW9ysfCPKPRuwm4kg1bKzSM?usp=drive_link).
+1. Follow the [ACE instructions](https://github.com/ZWStatLab/ACE) to obtain the real-data model outputs and corresponding `file_list` directory. The outputs are available through the [ACE Google Drive folder](https://drive.google.com/drive/folders/1HBmYO_BThSW9ysfCPKPRuwm4kg1bKzSM?usp=drive_link).
 2. Arrange the files using the ACE application layout, with the dataset files, task output folders, and `file_list` directory available from the working directory. Dataset files should be under `datasets/<dataset>/`, and model outputs under `<task>/deep_clustering_outputs/`.
 3. Run the real-data evaluation:
 
