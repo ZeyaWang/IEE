@@ -91,7 +91,7 @@ class Towards(TSNE):
 
             Pt = _joint_probabilities_towards(distances, self.perplexity, self.verbose)
         else:
-            ValueError("method must be exact in this version")
+            raise ValueError("method must be exact in this version")
         return Pt
 
     def _fit_fusion(self, X_list):
@@ -113,7 +113,7 @@ class Towards(TSNE):
             assert np.all(P <= 1), "All probabilities should be less or then equal to one"
         else:
             #### placeholder for future development of other methods like bh ###
-            ValueError("method must be exact at this version")
+            raise ValueError("method must be exact at this version")
 
         X_embedded = 1e-4 * random_state.standard_normal(
             size=(n_samples, self.n_components)
@@ -274,7 +274,7 @@ if __name__ == '__main__':
     X_towards, common_P, omega = to_manifold.fit_transform(x_list)
     kl = to_manifold.kl_divergence_
 
-    print(task, eval_data, data.shape)
+    print(task_name, eval_data, data.shape)
     scored['kl'] = kl
     scored['omega'] = dict(zip(modelFiles, omega.tolist()))
     scored['common_P'] = common_P
