@@ -1,45 +1,47 @@
-# Informative Embedding Ensemble: Towards a Consensus Space for Reliable Clustering Evaluation in Deep Learning
+# Informative Embedding Ensemble
 
-Deep clustering methods have seen extensive development in enhancing the scalability of traditional clustering techniques. By transforming high-dimensional data into a lower-dimensional latent feature space (also known as the embedding space) using deep neural networks, these methods make the clustering process more efficient and manageable. Most deep clustering approaches optimize a clustering objective based on the learned embedding space, addressing the challenges associated with high-dimensional data. Despite these advancements, accurately evaluating and validating the model performance remains a significant challenge, particularly due to the absence of labels. Proper evaluation is crucial for both model training and comparison, yet it remains an under-explored aspect of deep clustering research. 
+## Towards a Consensus Space for Reliable Clustering Evaluation in Deep Learning
 
+Deep clustering methods learn lower-dimensional embeddings that make clustering high-dimensional data more manageable. However, evaluating and comparing these models remains difficult when ground-truth labels are unavailable.
 
----
-### Dependencies
+This project implements an informative embedding ensemble that combines candidate embeddings into a shared consensus space. The resulting space can be used to calculate internal clustering metrics and compare their rankings with external benchmarks, including normalized mutual information (NMI) and clustering accuracy.
 
-This project requires the following Python packages:
+## Requirements
 
-* `numpy`
-* `scipy`
-* `scikit-learn==1.5` (version 1.5 is strictly required)
+The scripts require Python and the following packages:
 
----
+- NumPy
+- SciPy
+- scikit-learn 1.5
+- h5py
 
-### Evaluation
+The implementation relies on scikit-learn's t-SNE internals, so use the version specified above for compatibility.
 
-1. Download the evaluated output files from the deep clustering algorithms:
-   [Google Drive Folder](https://drive.google.com/drive/folders/1HBmYO_BThSW9ysfCPKPRuwm4kg1bKzSM?usp=drive_link)
+## Real-data evaluation
 
-2. Save them into the same local directory with the scripts.
+1. Follow the [ACE instructions](https://github.com/ZWStatLab/ACE) to obtain the real-data model outputs and corresponding `file_list` directory. The outputs and `file_list` are available through the [ACE Google Drive folder](https://drive.google.com/drive/folders/1HBmYO_BThSW9ysfCPKPRuwm4kg1bKzSM?usp=drive_link).
+2. Arrange the files using the ACE application layout, with the dataset files, task output folders, and `file_list` directory available from the working directory. Dataset files should be under `datasets/<dataset>/`, and model outputs under `<task>/deep_clustering_outputs/`.
+3. Run the real-data evaluation:
 
-3. Run the evaluation script `towards.py` to implement the experiments and obtain the results in the paper.
+   ```bash
+   python3 towards_real_data.py --task <task> --dataset <dataset>
+   ```
 
+Supported tasks are `JULE_hyper`, `JULE_num`, `DEPICT_hyper`, and `DEPICT_num`. Use the dataset name exactly as it appears in the ACE dataset directory (for example, `FRGC` or `COIL-20`).
 
-To evaluate a specific dataset or task:
+## Simulation evaluation
 
-```bash
-python towards.py --task <task> --dataset <dataset>
-```
+1. Follow the [ACE instructions](https://github.com/ZWStatLab/ACE) to generate or download the simulation data, and make it accessible from the working directory. Update the simulation data path in `towards_simulation.py` if your data is stored elsewhere.
+2. Run the simulation evaluation:
 
-#### Arguments
+   ```bash
+   python3 towards_simulation.py --task <task> --dataset <replication_id>
+   ```
 
-* `--task`: Specifies the task. Options:
+Supported simulation tasks are `sim_sparse_1.0`, `sim_sparse_2.0`, `sim_dense_1.0`, and `sim_dense_2.0`. The dataset argument is the simulation replication ID (for example, `1`).
 
-  * `jule`, `julenum` (for JULE tasks)
-  * `DEPICT`, `DEPICTnum` (for DEPICT tasks)
-* `--dataset`: Name of the dataset to evaluate
+Both evaluation scripts also accept `--n_components` and `--perplexity` to configure the consensus embedding. Their defaults are 2 and 30, respectively. The simulation script additionally accepts `--setting`.
 
----
+## Results
 
-### Output
-
-The script outputs Kendall Tau and Spearman correlation coefficients between internal evaluation metrics computed on the learned shared manifold and external benchmarks such as NMI and clustering accuracy.
+Each script saves a pickle file containing the consensus embedding and related scores. It also prints Kendall's tau and Spearman's rank correlation between internal clustering metrics and the external NMI and accuracy benchmarks.

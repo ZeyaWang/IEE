@@ -225,13 +225,12 @@ if __name__ == '__main__':
     from sklearn.metrics.cluster import normalized_mutual_info_score
 
     tasks = ['sim_convex_dense_1.0', 'sim_convex_sparse_1.0', 'sim_convex_dense_2.0', 'sim_convex_sparse_2.0']
-    sim_path = '/home/zwa281/JASA_sim/' # the data path for simulation data
+    sim_path = '.' # the data path for simulation data; this can be adapted to your own path
     save_path = '.' # the path for saved score
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='1')
     parser.add_argument('--task', default='sim_dense_1.0')
-    parser.add_argument('--setting', default='full')
     parser.add_argument('--n_components', type=int, default=2, help='number of components')
     parser.add_argument('--perplexity', type=float, default=30.0, help='perplexity')
 
@@ -245,20 +244,13 @@ if __name__ == '__main__':
         clist = [10, 25, 40, 50]
 
 
-    patterns = [f"^output{n_inf}_{100-n_inf}_{n_neighbors}_{min_dist}.*npz$" for n_inf in clist for n_neighbors in [5, 20, 50] for min_dist in [0.1, 0.5, 0.99]] + [f"^output{n_inf}_{100 - n_inf}_None_None.*npz$" for n_inf in clist]
-
     task_save_path = os.path.join(save_path, task_name, eval_data)
     task_data_path = os.path.join(sim_path, task_name, eval_data)
     os.makedirs(task_save_path, exist_ok=True)
-
-    tpath = os.path.join(task_save_path, 'manifold_{}_{}_{}'.format(args.setting, args.n_components, args.perplexity))
-
+    
+    tpath = os.path.join(task_save_path, 'manifold_{}_{}'.format(args.n_components, args.perplexity))
     os.makedirs(tpath, exist_ok=True)
-
-    combined = re.compile("|".join(f"(?:{p})" for p in patterns))
-
     modelFiles = fetch_files_with_substring_and_suffix(task_data_path, 'output', 'npz')
-    modelFiles = [s for s in modelFiles if combined.search(s)]
 
     print(len(modelFiles), 'files are found for task', task_name, eval_data)
     labels = {}
