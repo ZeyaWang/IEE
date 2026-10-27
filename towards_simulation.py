@@ -42,7 +42,7 @@ from sklearn.manifold import TSNE
 import scipy.stats as stats
 
 
-from fusion import weight_fusion_matrices
+from agg import weight_fusion_matrices
 
 def _joint_probabilities_towards(distances, desired_perplexity, verbose):
     # Compute conditional probabilities such that they approximately match
