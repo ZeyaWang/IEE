@@ -19,7 +19,7 @@
 # - Overrides `_fit_transform()`
 #
 # Usage:
-# model = Towards(n_components=2, perplexity=30, my_param=0.5)
+# model = IEE(n_components=2, perplexity=30, my_param=0.5)
 # embedding = model.fit_transform(X)
 #
 # Notes:
@@ -54,7 +54,7 @@ def _joint_probabilities_towards(distances, desired_perplexity, verbose):
     return conditional_P
 
 
-class Towards(TSNE):
+class IEE(TSNE):
     def _fit_prob(self, X):
         if self.learning_rate == "auto":
             self.learning_rate_ = X.shape[0] / self.early_exaggeration / 4
@@ -78,7 +78,7 @@ class Towards(TSNE):
                 distances = X
             else:
                 if self.verbose:
-                    print("Towards computing pairwise distances...")
+                    print("IEE computing pairwise distances...")
                 if self.metric == "euclidean":
                     distances = pairwise_distances(X, metric=self.metric, squared=True)
                 else:
@@ -89,6 +89,7 @@ class Towards(TSNE):
                     "All distances should be positive, the metric given is not correct"
                 )
 
+            # compute the joint probability distribution for the input space
             Pt = _joint_probabilities_towards(distances, self.perplexity, self.verbose)
         else:
             raise ValueError("method must be exact in this version")
@@ -138,13 +139,13 @@ class Towards(TSNE):
         X_new : ndarray of shape (n_samples, n_components)
             Embedding of the training data in low-dimensional space.
         """
+        #if self.max_iter is None:
         self._max_iter = 1000
         for X in X_list:
             self._check_params_vs_input(X)
         embedding, P, omega = self._fit_fusion(X_list)
         self.embedding_ = embedding
         return self.embedding_, P, omega
-
 
 def clustering_accuracy(true_labels, predicted_labels):
     true_labels = np.array(true_labels, dtype='int64')
@@ -166,7 +167,6 @@ def clustering_accuracy(true_labels, predicted_labels):
     return float(
         contingency_matrix[assigned_rows, assigned_columns].sum()
     ) / len(true_labels)
-
 
 def calinski_harabasz_score(x,y):
     if len(np.unique(y)) > 1:
@@ -195,7 +195,7 @@ def clustering_score(x,y, metric):
     else:
         return silhouette_score(x, y, metric=metric)
 
-def get_files_with_substring_and_suffix(directory, substring, suffix):
+def fetch_files_with_substring_and_suffix(directory, substring, suffix):
     all_files = os.listdir(directory)
     files = [file for file in all_files if substring in file and file.endswith(suffix)]
     return files
@@ -217,74 +217,72 @@ def spearmanr(score1, score2):
 if __name__ == '__main__':
     import numpy as np
     from sklearn import metrics
-    import os, h5py
+    import os, h5py, re
     import pickle as pk
     from collections import defaultdict
     import argparse
     from scipy.optimize import linear_sum_assignment
     from sklearn.metrics.cluster import normalized_mutual_info_score
 
+    tasks = ['sim_convex_dense_1.0', 'sim_convex_sparse_1.0', 'sim_convex_dense_2.0', 'sim_convex_sparse_2.0']
+    sim_path = '.' # the data path for simulation data; this can be adapted to your own path
+    save_path = '.' # the path for saved score
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', default='FRGC')
-    parser.add_argument('--task', default='DEPICT_hyper')
+    parser.add_argument('--dataset', default='1')
+    parser.add_argument('--task', default='sim_dense_1.0')
     parser.add_argument('--n_components', type=int, default=2, help='number of components')
     parser.add_argument('--perplexity', type=float, default=30.0, help='perplexity')
 
     args = parser.parse_args()
     eval_data = args.dataset
     task_name = args.task
-    tpath = os.path.join(task_name, 'iee_{}_{}'.format(args.n_components, args.perplexity))
+
+    if task_name.find('1.0') != -1:
+        clist = [10, 15, 20, 25]
+    else:
+        clist = [10, 25, 40, 50]
+
+
+    task_save_path = os.path.join(save_path, task_name, eval_data)
+    task_data_path = os.path.join(sim_path, task_name, eval_data)
+    os.makedirs(task_save_path, exist_ok=True)
+    
+    tpath = os.path.join(task_save_path, 'manifold_{}_{}'.format(args.n_components, args.perplexity))
     os.makedirs(tpath, exist_ok=True)
+    modelFiles = fetch_files_with_substring_and_suffix(task_data_path, 'output', 'npz')
 
-
-    file_list_path = os.path.join('file_list', task_name, '{}.txt'.format(eval_data))
-    with open(file_list_path, encoding='utf-8') as file:
-        modelFiles = [line.strip() for line in file if line.strip()]
-
+    print(len(modelFiles), 'files are found for task', task_name, eval_data)
     labels = {}
     features = {}
+    truths={}
+    output = defaultdict(dict)
     scored = defaultdict(dict)
 
-    tfname = os.path.join('datasets', eval_data, 'data4torch.h5')
-    dataset_file = h5py.File(tfname, 'r')
-    truth = np.squeeze(np.array(dataset_file['labels']))
-    data = np.array(dataset_file['data'])
-    data = np.stack([data[i].flatten() for i in range(data.shape[0])], axis=0)
 
-    output_dir = os.path.join(task_name, 'deep_clustering_outputs')
-    if 'JULE' in task_name:
-        for m in modelFiles:
-            ffname = os.path.join(output_dir, 'feature{}.h5'.format(m))
-            lfname = os.path.join(output_dir, 'label{}.h5'.format(m))
-            features[m] = np.array(h5py.File(ffname, 'r')['feature'])
-            labels[m] = np.squeeze(np.array(h5py.File(lfname, 'r')['label']))
-    else:
-        for m in modelFiles:
-            files = np.load(os.path.join(output_dir, m))
-            features[m] = np.array(files['y_features'])
-            labels[m] = np.squeeze(np.array(files['y_pred']))
+    for m in modelFiles:
+        files = np.load(os.path.join(task_data_path,m))
+        features[m] = np.array(files['y_features'])
+        labels[m] = np.squeeze(np.array(files['y_pred']))
+        truths[m] = np.squeeze(np.array(files['truth']))
 
     x_list = []
     for m in modelFiles:
         x = features[m]
         x_list.append(x)
 
-    to_manifold = Towards(n_components=args.n_components, random_state=1, method='exact', perplexity=args.perplexity)
+    to_manifold = IEE(n_components=args.n_components, random_state=1, method='exact', perplexity=args.perplexity)
     X_towards, common_P, omega = to_manifold.fit_transform(x_list)
     kl = to_manifold.kl_divergence_
 
-    print(task_name, eval_data, data.shape)
-    scored['kl'] = kl
-    scored['omega'] = dict(zip(modelFiles, omega.tolist()))
-    scored['common_P'] = common_P
-    scored['X_towards'] = X_towards
+    print(task_name, eval_data)
 
     davs, chs, euclideans, nmis, accs = [], [], [], [], []
     for i, key in enumerate(modelFiles):
         y = labels[key]
         for metric in ['dav', 'ch', 'euclidean']:
             scored[metric][key] = clustering_score(X_towards, y, metric=metric)
+        truth = truths[key]
         scored['nmi'][key] = normalized_mutual_info_score(truth, y)
         scored['acc'][key] = clustering_accuracy(truth, y)
         accs.append(scored['acc'][key])
@@ -311,6 +309,9 @@ if __name__ == '__main__':
     print(spearmanr(davs, accs))
     print(spearmanr(chs, accs))
 
+    # with open(os.path.join(tpath,'output.pkl'), 'wb') as file:
+    #     pk.dump(output, file)
 
-    with open(os.path.join(tpath,'{}_{}_score.pkl'.format(task_name,eval_data)), 'wb') as file:
+    with open(os.path.join(tpath,'score.pkl'), 'wb') as file:
         pk.dump(scored, file)
+

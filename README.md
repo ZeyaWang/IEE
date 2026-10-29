@@ -1,6 +1,6 @@
 # Informative Embedding Ensemble
 
-## Towards a Consensus Space for Reliable Clustering Evaluation in Deep Learning
+## Constructing a Consensus Space for Reliable Clustering Evaluation in Deep Learning
 
 Deep clustering methods learn lower-dimensional embeddings that make high-dimensional data easier to cluster. However, evaluating and comparing these models remains challenging when ground-truth labels are unavailable.
 
@@ -24,18 +24,18 @@ The implementation relies on scikit-learn's internal t-SNE APIs. Use the version
 3. Run the real-data evaluation:
 
    ```bash
-   python3 towards_real_data.py --task <task> --dataset <dataset>
+   python3 iee_real_data.py --task <task> --dataset <dataset>
    ```
 
 Supported tasks are `JULE_hyper`, `JULE_num`, `DEPICT_hyper`, and `DEPICT_num`. Specify the dataset name exactly as it appears in the ACE dataset directory (for example, `FRGC` or `COIL-20`).
 
 ## Simulation evaluation
 
-1. Follow the [ACE instructions](https://github.com/ZWStatLab/ACE) to generate the simulation data and make it accessible from the working directory. If the data is stored elsewhere, update the simulation data path in `towards_simulation.py`.
+1. Follow the [ACE instructions](https://github.com/ZWStatLab/ACE) to generate the simulation data and make it accessible from the working directory. If the data is stored elsewhere, update the simulation data path in `iee_simulation.py`.
 2. Run the simulation evaluation:
 
    ```bash
-   python3 towards_simulation.py --task <task> --dataset <replication_id>
+   python3 iee_simulation.py --task <task> --dataset <replication_id>
    ```
 
 Supported simulation tasks are `sim_sparse_1.0`, `sim_sparse_2.0`, `sim_dense_1.0`, and `sim_dense_2.0`, which represent different simulation settings. The `--dataset` argument specifies the replication ID (for example, `1`).
