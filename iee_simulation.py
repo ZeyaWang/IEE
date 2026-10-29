@@ -222,7 +222,7 @@ if __name__ == '__main__':
     from collections import defaultdict
     import argparse
     from scipy.optimize import linear_sum_assignment
-    from sklearn.metrics.cluster import normalized_mutual_info_score
+    from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
 
     tasks = ['sim_convex_dense_1.0', 'sim_convex_sparse_1.0', 'sim_convex_dense_2.0', 'sim_convex_sparse_2.0']
     sim_path = '.' # the data path for simulation data; this can be adapted to your own path
@@ -277,7 +277,7 @@ if __name__ == '__main__':
 
     print(task_name, eval_data)
 
-    davs, chs, euclideans, nmis, accs = [], [], [], [], []
+    davs, chs, euclideans, nmis, accs, aris = [], [], [], [], [], []
     for i, key in enumerate(modelFiles):
         y = labels[key]
         for metric in ['dav', 'ch', 'euclidean']:
@@ -285,8 +285,10 @@ if __name__ == '__main__':
         truth = truths[key]
         scored['nmi'][key] = normalized_mutual_info_score(truth, y)
         scored['acc'][key] = clustering_accuracy(truth, y)
+        scored['ari'][key] = adjusted_rand_score(truth, y)
         accs.append(scored['acc'][key])
         nmis.append(scored['nmi'][key])
+        aris.append(scored['ari'][key])
         davs.append(scored['dav'][key])
         chs.append(scored['ch'][key])
         euclideans.append(scored['euclidean'][key])
@@ -300,6 +302,10 @@ if __name__ == '__main__':
     print(kendalltau(euclideans, accs))
     print(kendalltau(davs, accs))
     print(kendalltau(chs, accs))
+    print('kendall tau in terms of ari')
+    print(kendalltau(euclideans, aris))
+    print(kendalltau(davs, aris))
+    print(kendalltau(chs, aris))
     print('spearman rank correlation in terms of nmi')
     print(spearmanr(euclideans, nmis))
     print(spearmanr(davs, nmis))
@@ -308,6 +314,10 @@ if __name__ == '__main__':
     print(spearmanr(euclideans, accs))
     print(spearmanr(davs, accs))
     print(spearmanr(chs, accs))
+    print('spearman rank correlation in terms of ari')
+    print(spearmanr(euclideans, aris))
+    print(spearmanr(davs, aris))
+    print(spearmanr(chs, aris))
 
     # with open(os.path.join(tpath,'output.pkl'), 'wb') as file:
     #     pk.dump(output, file)

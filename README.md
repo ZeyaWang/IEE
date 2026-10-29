@@ -4,7 +4,7 @@
 
 Deep clustering methods learn lower-dimensional embeddings that make high-dimensional data easier to cluster. However, evaluating and comparing these models remains challenging when ground-truth labels are unavailable.
 
-This project implements an informative embedding ensemble that combines candidate embeddings into a shared consensus space. This space supports the calculation of internal clustering metrics and comparison of their rankings against external benchmarks, including normalized mutual information (NMI) and clustering accuracy.
+This project implements an informative embedding ensemble that combines candidate embeddings into a shared consensus space. This space supports the calculation of internal clustering metrics and comparison of their rankings against external benchmarks, including normalized mutual information (NMI), clustering accuracy (ACC), and the adjusted Rand index (ARI).
 
 ## Requirements
 
