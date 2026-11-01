@@ -1,13 +1,13 @@
 # =============================================================================
-# Shared manifold for Reliable Clustering Evaluation in Deep Learning
+# Consensus Space for Reliable Clustering Evaluation in Deep Learning
 # =============================================================================
 # File: iee_simulation.py
 
 #
 # Description:
-# This module implements a method to learn a shared manifold for internal vaildation
-# in deep clustering evaluation. Our method can be adapted with different manifold 
-# learning method. This implementation is based on TSNE, and extends scikit-learn's 
+# This module implements a method to learn a consensus space for internal validation
+# in deep clustering evaluation. Our method can be adapted to other manifold
+# learning methods. This implementation is based on TSNE, and extends scikit-learn's 
 # TSNE implementation and overrides several key methods in TSNE. 
 #
 # Based on:
@@ -16,14 +16,14 @@
 #
 # Key Features:
 # - Inherits from sklearn.manifold.TSNE
-# - Overrides `_fit_transform()`
+# - Overrides `fit_transform()`
 #
 # Usage:
-# model = IEE(n_components=2, perplexity=30, my_param=0.5)
-# embedding = model.fit_transform(X)
+# model = IEE(n_components=2, method='exact', perplexity=30)
+# embedding, _, _ = model.fit_transform(X_list)
 #
 # Notes:
-# Ensure compatibility with the sklearn version 1.5.1
+# Ensure compatibility with scikit-learn version 1.5
 # This code is for research and prototyping purposes.
 #
 # =============================================================================
@@ -32,7 +32,7 @@
 
 
 import numpy as np
-from scipy.spatial.distance import pdist, squareform
+from scipy.spatial.distance import squareform
 MACHINE_EPSILON = np.finfo(np.double).eps
 from sklearn.utils import check_random_state
 from sklearn.metrics.pairwise import pairwise_distances
@@ -217,14 +217,13 @@ def spearmanr(score1, score2):
 if __name__ == '__main__':
     import numpy as np
     from sklearn import metrics
-    import os, h5py, re
+    import os
     import pickle as pk
     from collections import defaultdict
     import argparse
     from scipy.optimize import linear_sum_assignment
     from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
 
-    tasks = ['sim_convex_dense_1.0', 'sim_convex_sparse_1.0', 'sim_convex_dense_2.0', 'sim_convex_sparse_2.0']
     sim_path = '.' # the data path for simulation data; this can be adapted to your own path
     save_path = '.' # the path for saved score
 
@@ -237,11 +236,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     eval_data = args.dataset
     task_name = args.task
-
-    if task_name.find('1.0') != -1:
-        clist = [10, 15, 20, 25]
-    else:
-        clist = [10, 25, 40, 50]
 
 
     task_save_path = os.path.join(save_path, task_name, eval_data)
@@ -256,7 +250,6 @@ if __name__ == '__main__':
     labels = {}
     features = {}
     truths={}
-    output = defaultdict(dict)
     scored = defaultdict(dict)
 
 
@@ -276,6 +269,10 @@ if __name__ == '__main__':
     kl = to_manifold.kl_divergence_
 
     print(task_name, eval_data)
+    scored['kl'] = kl
+    scored['omega'] = dict(zip(modelFiles, omega.tolist()))
+    scored['common_P'] = common_P
+    scored['X_towards'] = X_towards
 
     davs, chs, euclideans, nmis, accs, aris = [], [], [], [], [], []
     for i, key in enumerate(modelFiles):

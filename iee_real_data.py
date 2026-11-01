@@ -1,13 +1,13 @@
 # =============================================================================
-# Shared manifold for Reliable Clustering Evaluation in Deep Learning
+# Consensus Space for Reliable Clustering Evaluation in Deep Learning
 # =============================================================================
 # File: iee_real_data.py
 
 #
 # Description:
-# This module implements a method to learn a shared manifold for internal vaildation
-# in deep clustering evaluation. Our method can be adapted with different manifold 
-# learning method. This implementation is based on TSNE, and extends scikit-learn's 
+# This module implements a method to learn a consensus space for internal validation
+# in deep clustering evaluation. Our method can be adapted to other manifold
+# learning methods. This implementation is based on TSNE, and extends scikit-learn's 
 # TSNE implementation and overrides several key methods in TSNE. 
 #
 # Based on:
@@ -16,14 +16,14 @@
 #
 # Key Features:
 # - Inherits from sklearn.manifold.TSNE
-# - Overrides `_fit_transform()`
+# - Overrides `fit_transform()`
 #
 # Usage:
-# model = IEE(n_components=2, perplexity=30, my_param=0.5)
-# embedding = model.fit_transform(X)
+# model = IEE(n_components=2, method='exact', perplexity=30)
+# embedding, _, _ = model.fit_transform(X_list)
 #
 # Notes:
-# Ensure compatibility with the sklearn version 1.5.1
+# Ensure compatibility with scikit-learn version 1.5
 # This code is for research and prototyping purposes.
 #
 # =============================================================================
