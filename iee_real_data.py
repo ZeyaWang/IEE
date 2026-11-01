@@ -1,7 +1,7 @@
 # =============================================================================
 # Shared manifold for Reliable Clustering Evaluation in Deep Learning
 # =============================================================================
-# File: towards.py
+# File: iee_real_data.py
 
 #
 # Description:
@@ -195,7 +195,7 @@ def clustering_score(x,y, metric):
     else:
         return silhouette_score(x, y, metric=metric)
 
-def get_files_with_substring_and_suffix(directory, substring, suffix):
+def fetch_files_with_substring_and_suffix(directory, substring, suffix):
     all_files = os.listdir(directory)
     files = [file for file in all_files if substring in file and file.endswith(suffix)]
     return files

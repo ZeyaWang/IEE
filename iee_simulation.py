@@ -1,7 +1,7 @@
 # =============================================================================
 # Shared manifold for Reliable Clustering Evaluation in Deep Learning
 # =============================================================================
-# File: towards.py
+# File: iee_simulation.py
 
 #
 # Description:
@@ -319,8 +319,6 @@ if __name__ == '__main__':
     print(spearmanr(davs, aris))
     print(spearmanr(chs, aris))
 
-    # with open(os.path.join(tpath,'output.pkl'), 'wb') as file:
-    #     pk.dump(output, file)
 
     with open(os.path.join(tpath,'score.pkl'), 'wb') as file:
         pk.dump(scored, file)
