@@ -27,7 +27,7 @@ The implementation relies on scikit-learn's internal t-SNE APIs. Use the version
    python3 iee_real_data.py --task <task> --dataset <dataset>
    ```
 
-Supported tasks are `JULE_hyper`, `JULE_num`, `DEPICT_hyper`, and `DEPICT_num`. Specify the dataset name exactly as it appears in the ACE dataset directory (for example, `FRGC` or `COIL-20`).
+Supported tasks are `JULE_hyper`, `JULE_num`, `DEPICT_hyper`, and `DEPICT_num`. Specify the dataset name exactly as it appears in the ACE dataset directory (for example, `FRGC` or `COIL-20`). The script `reduce_hyperparameter.py` generates model list files that specify a reduced set of hyperparameter combinations for use with `iee_real_data.py`. Place these files in the `file_list` directory, overwriting the original files, and then run `iee_real_data.py` for the real-data evaluation.
 
 ## Simulation evaluation
 
